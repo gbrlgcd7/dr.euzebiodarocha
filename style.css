@@ -580,3 +580,98 @@ a { text-decoration: none; color: inherit; }
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ============================================================
+ * MOBILE PERFORMANCE — scroll fluido, sem jank
+ * Todas as otimizações aqui dentro de max-width: 768px.
+ * Desktop não é afetado.
+ * ============================================================ */
+
+/* Scroll nativo iOS — fora do media query (global) */
+body { -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 768px) {
+
+  /* Smooth scroll causa jank em mobile — desativar */
+  html { scroll-behavior: auto; }
+
+  /* ── 1. BACKDROP-FILTER ───────────────────────────────────
+     blur() força compositing layer em cada frame de scroll.
+     Substituímos por cor sólida semi-opaca.               */
+  .nav {
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .hero-badge {
+    background: rgba(0,0,0,0.28);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* ── 2. FILTER NA IMAGEM HERO ────────────────────────────
+     brightness() na img cria layer separada no compositor. */
+  .hero-bg img { filter: none; }
+
+  /* ── 3. TRANSIÇÕES E ANIMAÇÕES ──────────────────────────
+     Duração 0ms = estado final aplicado instantâneamente,
+     sem custo de rasterização por frame.                  */
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration:  0.01ms !important;
+    animation-delay:     0ms    !important;
+  }
+
+  /* ── 4. SCROLL INDICATOR ────────────────────────────────
+     Animação de bounce em loop = CPU gasto continuamente. */
+  .scroll-indicator { display: none; }
+
+  /* ── 5. SCROLL REVEAL ───────────────────────────────────
+     Conteúdo já visível — elimina repaints por opacity +
+     transform ao fazer scroll.                            */
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* ── 6. SECTION STACKING ────────────────────────────────
+     Negative margin + border-radius cria contexto de
+     stacking complexo → mais trabalho por frame no scroll. */
+  .section-stacked {
+    border-radius: 0 !important;
+    margin-top: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* ── 7. BOX-SHADOW ──────────────────────────────────────
+     Sombras grandes (blur alto) custam repaint.
+     Simplificamos para sombra de 1 camada leve.          */
+  .card,
+  #services-grid .card  { box-shadow: 0 1px 8px rgba(0,0,0,0.09); }
+  .result-card          { box-shadow: 0 1px 8px rgba(0,0,0,0.09); }
+  .about-img-wrapper img{ box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+  .map-wrapper          { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+  .floating-wa          { box-shadow: 0 2px 12px rgba(34,197,94,0.35); }
+
+  /* ── 8. HOVER / TOUCH ───────────────────────────────────
+     No mobile hover = tap. Transform em tap causa layout
+     shift inesperado. Removemos todos os lifts.          */
+  .card:hover,
+  #services-grid .card:hover,
+  .result-card:hover,
+  #diff-grid > div:hover,
+  .btn-whatsapp:hover,
+  .floating-wa:hover,
+  .footer-icon:hover    { transform: none !important; }
+  .result-card:hover img{ transform: none !important; }
+
+  /* ── 9. WILL-CHANGE ─────────────────────────────────────
+     Garante que nenhum elemento implicitamente promovido
+     a layer fique em memória GPU sem necessidade.        */
+  * { will-change: auto; }
+
+  /* ── 10. TOUCH ACTION ───────────────────────────────────
+     Elimina o 300ms delay de tap em iOS/Android.        */
+  a, button { touch-action: manipulation; }
+
+}
