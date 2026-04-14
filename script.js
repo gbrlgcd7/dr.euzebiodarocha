@@ -209,7 +209,6 @@ data.processo.forEach(function(p) {
   // Footer
   document.getElementById("footer-nome").textContent = data.nome;
   document.getElementById("footer-sub").textContent = data.especialidade + " · " + data.cro;
-  document.getElementById("footer-endereco").textContent = data.endereco + " · " + data.cidade;
   document.getElementById("footer-wa").href = waUrl;
   document.getElementById("footer-copy").textContent = "© " + new Date().getFullYear() + " " + data.nome + ". Todos os direitos reservados.";
 
